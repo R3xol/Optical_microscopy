@@ -51,3 +51,48 @@ Live cells were imaged in phenol-red-free RPMI-1640 medium supplemented with B27
   - `skimage`
   - `matplotlib`
   - Additional dependencies listed in `Microscopy.yml`.
+
+
+# ObjectSegmenter for Microscopy Images
+
+The `ObjectSegmenter.cl` file is part of the `apoc` library, used for object segmentation in microscopy images. Specifically, it is an OpenCL-based implementation of a machine learning model for segmenting objects (e.g., cell nuclei) in images. The `.cl` extension indicates that the file contains OpenCL code, a framework for writing programs that execute across heterogeneous platforms (e.g., CPUs, GPUs).
+
+## Key Points About ObjectSegmenter.cl
+
+### Purpose
+The ObjectSegmenter is trained to segment objects (e.g., cell nuclei) in microscopy images. It uses features derived from the input image (e.g., Gaussian blur, Sobel filters, Laplacian filters) to learn how to distinguish objects from the background.
+
+### Training
+The `train` method is used to train the model. It takes two main inputs:
+1. A string specifying the features to extract from the image (e.g., `sobel_of_gaussian_blur=2 laplace_box_of_gaussian_blur=2 gaussian_blur=2`).
+2. A manually annotated image (`manual_annotations`) that serves as the ground truth for training.
+
+The model learns to predict the segmentation based on the provided features and annotations.
+
+### Prediction
+After training, the `predict` method is used to segment new images. It applies the learned model to the input image and outputs a labeled image where each object is assigned a unique label.
+
+### OpenCL
+The `.cl` file contains OpenCL kernels that are used to accelerate the computation of image features and segmentation. OpenCL allows the code to run efficiently on GPUs or other parallel processing units.
+
+## How It Fits into Your Project
+
+### Input Data
+The code processes microscopy images (`C1.tif`) of hiPSC-derived cardiomyocytes.
+
+### Preprocessing
+The images are filtered using Gaussian and median filters to reduce noise and enhance features.
+
+### Training
+The ObjectSegmenter is trained on manually annotated images (`layer2.tif`) to learn how to segment cell nuclei.
+
+### Segmentation
+The trained model is applied to the input images to generate segmentation masks.
+
+### Postprocessing
+The segmented objects are refined using morphological operations (e.g., opening, removing small objects) and filtered based on properties like eccentricity and solidity to ensure only well-defined, complete cells are retained.
+
+## Example Features Used in Training
+- **sobel_of_gaussian_blur=2:** Applies a Sobel filter to the Gaussian-blurred image (sigma=2).
+- **laplace_box_of_gaussian_blur=2:** Applies a Laplacian filter to the Gaussian-blurred image (sigma=2).
+- **gaussian_blur=2:** Applies a Gaussian blur (sigma=2).
